@@ -9,6 +9,119 @@ import streamlit as st
 st.set_page_config(page_title="Cover + Density Data Cleaner", page_icon="🌿", layout="wide")
 
 
+# -----------------------------
+# Professional UI styling
+# -----------------------------
+st.markdown(
+    """
+    <style>
+        .stApp {
+            background: linear-gradient(180deg, #f7fbf7 0%, #ffffff 38%);
+        }
+
+        .block-container {
+            padding-top: 2rem;
+            padding-bottom: 3rem;
+            max-width: 1280px;
+        }
+
+        .hero-card {
+            padding: 2rem 2.25rem;
+            border-radius: 24px;
+            background: linear-gradient(135deg, #163d2a 0%, #256b46 55%, #7aa95c 100%);
+            color: white;
+            box-shadow: 0 18px 42px rgba(22, 61, 42, 0.22);
+            margin-bottom: 1.4rem;
+        }
+
+        .hero-card h1 {
+            font-size: 2.35rem;
+            line-height: 1.15;
+            margin: 0 0 0.55rem 0;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+        }
+
+        .hero-card p {
+            font-size: 1.05rem;
+            line-height: 1.6;
+            max-width: 850px;
+            margin: 0;
+            opacity: 0.96;
+        }
+
+        .section-card {
+            border: 1px solid #dfe8df;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.94);
+            padding: 1.2rem 1.35rem;
+            box-shadow: 0 10px 28px rgba(20, 50, 32, 0.07);
+            margin: 0.85rem 0 1.1rem 0;
+        }
+
+        .mode-card {
+            border-left: 6px solid #2f7d4f;
+            border-radius: 18px;
+            background: #f3faf4;
+            padding: 1.05rem 1.2rem;
+            box-shadow: 0 8px 22px rgba(20, 50, 32, 0.06);
+            margin: 1rem 0 1.2rem 0;
+        }
+
+        .mode-card h3 {
+            margin: 0 0 0.35rem 0;
+            color: #163d2a;
+            font-size: 1.18rem;
+            font-weight: 750;
+        }
+
+        .mode-card p {
+            margin: 0;
+            color: #2d4738;
+            line-height: 1.55;
+        }
+
+        div[data-testid="stFileUploader"] {
+            border: 1px dashed #8eb99b;
+            border-radius: 20px;
+            padding: 1rem;
+            background: #fbfdfb;
+        }
+
+        div[data-testid="stDownloadButton"] > button {
+            width: 100%;
+            min-height: 3.4rem;
+            border-radius: 16px;
+            font-size: 1.05rem;
+            font-weight: 750;
+            border: 0;
+            background: linear-gradient(135deg, #1f6f43 0%, #2f8f5b 100%);
+            color: white;
+            box-shadow: 0 12px 24px rgba(31, 111, 67, 0.22);
+        }
+
+        div[data-testid="stDownloadButton"] > button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 16px 30px rgba(31, 111, 67, 0.28);
+            border: 0;
+        }
+
+        div[data-testid="stDataFrame"] {
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        .small-muted {
+            color: #647067;
+            font-size: 0.92rem;
+            margin-top: -0.3rem;
+        }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+
 PLOT_DESCRIPTIONS = {
     "BN": ("Burned", "Excluded"),
     "BS": ("Burned", "Present"),
@@ -521,50 +634,97 @@ def workbook_bytes_density(
 # Streamlit UI
 # -----------------------------
 
-st.title("🌿 Cover + Density Data Cleaner")
-st.write(
-    "Upload one or more CSV or Excel files, choose the data type, and download a cleaned Excel workbook."
+st.markdown(
+    """
+    <div class="hero-card">
+        <h1>🌿 Lytle + Rush Data Cleaner</h1>
+        <p>
+            Upload field data in CSV or Excel format, choose the processing type, preview the cleaned output,
+            and download a ready-to-use Excel workbook.
+        </p>
+    </div>
+    """,
+    unsafe_allow_html=True,
 )
 
-processing_mode = st.radio(
-    "What type of data are you cleaning?",
-    options=["Cover Data", "Density Data"],
-    horizontal=True,
-)
+left_intro, right_intro = st.columns([1.25, 1])
+
+with left_intro:
+    processing_mode = st.radio(
+        "Choose the type of data to clean",
+        options=["Cover Data", "Density Data"],
+        horizontal=True,
+    )
+
+with right_intro:
+    st.markdown(
+        """
+        <div class="section-card">
+            <strong>Output formats</strong><br>
+            <span class="small-muted">
+                Cover data creates proportion and percent sheets. Density data creates a species totals wide sheet.
+            </span>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
 empty_hit_label = "NO_HIT"
 
 if processing_mode == "Cover Data":
-    st.info(
-        "Cover Data mode now follows your original cover program: one hit per row, foliar priority first, BASAL last, "
-        "then output only `Cover Proportion` and `Cover Percent` sheets."
+    st.markdown(
+        """
+        <div class="mode-card">
+            <h3>Cover Data</h3>
+            <p>
+                Use this option for point-intercept cover files with columns such as
+                <strong>BASAL</strong>, <strong>1ST FOLIAR</strong>, <strong>2ND FOLIAR</strong>, and
+                <strong>3RD FOLIAR</strong>. The app selects one cover hit per row using foliar layers first,
+                then basal, groups the results by <strong>BLOCK + PLOT</strong>, and exports clean cover
+                proportion and percent spreadsheets.
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True,
     )
     empty_hit_label = st.selectbox(
-        "How should completely empty cover rows be labeled?",
+        "Label for completely empty cover rows",
         options=["NO_HIT", "0"],
         index=0,
         help="NO_HIT matches the uploaded example workbook. Choose 0 if you want blank cover rows labeled as 0 instead.",
     )
 else:
-    st.info(
-        "Density Data follows your original density calculator format: it sums columns `1` through `12` by `BLOCK + PLOT + SPECIES`, "
-        "then exports one sheet named `Species Totals Wide` with `DATE, BLOCK, PLOT, FIRE, RODENTS` and species columns. "
-        "Blank count cells become 0. Asterisks are ignored completely, so `2*` is treated as `2`, and `*` by itself becomes `0`. No `*5` multiplier is applied."
+    st.markdown(
+        """
+        <div class="mode-card">
+            <h3>Density Data</h3>
+            <p>
+                Use this option for density files with <strong>BLOCK</strong>, <strong>PLOT</strong>,
+                <strong>SPECIES</strong>, and count columns <strong>1 through 12</strong>. The app sums the
+                count columns for each species, combines totals by <strong>BLOCK + PLOT</strong>, and exports
+                a wide species totals spreadsheet. Blank count cells are treated as 0, and asterisks are ignored.
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True,
     )
 
 uploaded_files = st.file_uploader(
     "Upload CSV or Excel files",
     type=["csv", "xlsx", "xls"],
     accept_multiple_files=True,
+    help="You can upload one file or several files at once.",
 )
 
 if uploaded_files:
     all_outputs = []
 
+    st.markdown("### Processing results")
+
     for idx, uploaded_file in enumerate(uploaded_files, start=1):
         file_bytes = uploaded_file.getvalue()
         st.divider()
-        st.subheader(f"File {idx}: {uploaded_file.name}")
+        st.markdown(f"#### File {idx}: `{uploaded_file.name}`")
 
         selected_sheet = None
         if uploaded_file.name.lower().endswith((".xlsx", ".xls")):
@@ -582,8 +742,9 @@ if uploaded_files:
 
         try:
             raw_df = read_uploaded_file(file_bytes, uploaded_file.name, selected_sheet)
-            st.caption("Raw preview")
-            st.dataframe(raw_df.head(10), use_container_width=True)
+
+            with st.expander("Raw file preview", expanded=False):
+                st.dataframe(raw_df.head(10), use_container_width=True)
 
             if processing_mode == "Cover Data":
                 proportion_df, percent_df, point_counts_df, matched = process_cover_dataframe(
@@ -619,19 +780,19 @@ if uploaded_files:
                         else:
                             st.success(msg)
 
-            col1, col2 = st.columns(2)
-            with col1:
-                st.caption(preview_title)
+            preview_col, check_col = st.columns([1.2, 1])
+            with preview_col:
+                st.markdown(f"**{preview_title}**")
                 st.dataframe(preview_df.head(10), use_container_width=True)
-            with col2:
-                st.caption(check_title)
+            with check_col:
+                st.markdown(f"**{check_title}**")
                 st.dataframe(check_df, use_container_width=True)
 
             output_name = uploaded_file.name.rsplit(".", 1)[0] + f"_{suffix}.xlsx"
             all_outputs.append((output_name, xlsx_bytes))
 
             st.download_button(
-                label=f"Download {output_name}",
+                label=f"⬇️ Download cleaned Excel workbook: {output_name}",
                 data=xlsx_bytes,
                 file_name=output_name,
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -650,10 +811,18 @@ if uploaded_files:
         st.divider()
         zip_name = "cleaned_cover_workbooks.zip" if processing_mode == "Cover Data" else "cleaned_density_workbooks.zip"
         st.download_button(
-            label="Download all cleaned workbooks as ZIP",
+            label="⬇️ Download all cleaned workbooks as ZIP",
             data=zip_buffer.getvalue(),
             file_name=zip_name,
             mime="application/zip",
         )
 else:
-    st.info("Upload at least one file to start.")
+    st.markdown(
+        """
+        <div class="section-card">
+            <strong>Ready when you are.</strong><br>
+            <span class="small-muted">Upload at least one CSV or Excel file to generate a cleaned workbook.</span>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
